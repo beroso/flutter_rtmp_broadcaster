@@ -15,7 +15,9 @@ import android.widget.Toast
 import com.pedro.encoder.input.video.CameraHelper.Facing.BACK
 import com.pedro.encoder.input.video.CameraHelper.Facing.FRONT
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
+import com.pedro.rtplibrary.rtsp.RtspCamera2
 import com.pedro.rtplibrary.view.LightOpenGlView
+import com.pedro.rtsp.utils.ConnectCheckerRtsp
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import net.ossrs.rtmp.ConnectCheckerRtmp
@@ -31,10 +33,10 @@ class CameraNativeView(
 ) :
     PlatformView,
     SurfaceHolder.Callback,
-    ConnectCheckerRtmp {
+    ConnectCheckerRtmp, ConnectCheckerRtsp {
 
     private val glView = LightOpenGlView(activity)
-    private val rtmpCamera: RtmpCamera2
+    private val rtmpCamera: RtspCamera2
 
     private var isSurfaceCreated = false
     private var fps = 0
@@ -42,7 +44,7 @@ class CameraNativeView(
     init {
         glView.isKeepAspectRatio = true
         glView.holder.addCallback(this)
-        rtmpCamera = RtmpCamera2(glView, this)
+        rtmpCamera = RtspCamera2(glView, this)
         rtmpCamera.setReTries(10)
         rtmpCamera.setFpsListener { fps = it }
     }
@@ -321,5 +323,29 @@ class CameraNativeView(
         val cameraManager = activity?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val characteristics = cameraManager.getCameraCharacteristics(cameraName)
         return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
+    }
+
+    override fun onAuthErrorRtsp() {
+        onAuthErrorRtmp()
+    }
+
+    override fun onAuthSuccessRtsp() {
+        onAuthSuccessRtmp()
+    }
+
+    override fun onConnectionFailedRtsp(reason: String) {
+        onConnectionFailedRtmp(reason)
+    }
+
+    override fun onConnectionSuccessRtsp() {
+        onConnectionSuccessRtmp()
+    }
+
+    override fun onDisconnectRtsp() {
+        onDisconnectRtmp()
+    }
+
+    override fun onNewBitrateRtsp(bitrate: Long) {
+        onNewBitrateRtmp(bitrate)
     }
 }

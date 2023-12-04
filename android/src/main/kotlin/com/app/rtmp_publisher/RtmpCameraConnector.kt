@@ -21,14 +21,15 @@ import com.pedro.rtplibrary.util.FpsListener
 import com.pedro.rtplibrary.util.RecordController
 import com.pedro.rtplibrary.view.OffScreenGlThread
 import net.ossrs.rtmp.ConnectCheckerRtmp
+import com.pedro.rtsp.utils.ConnectCheckerRtsp
 import net.ossrs.rtmp.SrsFlvMuxer
 import java.nio.ByteBuffer
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPortrait: Boolean, val connectChecker: ConnectCheckerRtmp) :
+class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPortrait: Boolean, val connectChecker: ConnectCheckerRtmp, val connectCheckerRtsp: ConnectCheckerRtsp) :
         GetAacData, GetVideoData, GetMicrophoneData, FpsListener.Callback,
-        RecordController.Listener, ConnectCheckerRtmp {
+        RecordController.Listener, ConnectCheckerRtmp, ConnectCheckerRtsp {
     private var videoEncoder: AppVideoEncoder? = null
     private var microphoneManager: MicrophoneManager
     private var audioEncoder: AudioEncoder
@@ -497,30 +498,60 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
         if (!videoEncoder!!.running) {
             startEncoders()
         }
-        connectChecker.onConnectionSuccessRtmp()
+        // connectChecker.onConnectionSuccessRtmp()
+        connectCheckerRtsp.onConnectionSuccessRtsp()
     }
 
     override fun onConnectionFailedRtmp(reason: String) {
-        connectChecker.onConnectionFailedRtmp(reason)
+        // connectChecker.onConnectionFailedRtmp(reason)
+        connectCheckerRtsp.onConnectionFailedRtsp(reason)
     }
 
     override fun onNewBitrateRtmp(bitrate: Long) {
-        connectChecker.onNewBitrateRtmp(bitrate)
+        // connectChecker.onNewBitrateRtmp(bitrate)
+        connectCheckerRtsp.onNewBitrateRtsp(bitrate)
     }
 
     override fun onDisconnectRtmp() {
-        connectChecker.onDisconnectRtmp()
+        // connectChecker.onDisconnectRtmp()
+        connectCheckerRtsp.onDisconnectRtsp()
     }
 
     override fun onAuthErrorRtmp() {
-        connectChecker.onAuthErrorRtmp()
+        // connectChecker.onAuthErrorRtmp()
+        connectCheckerRtsp.onAuthErrorRtsp()
     }
 
     override fun onAuthSuccessRtmp() {
-        connectChecker.onAuthSuccessRtmp()
+        // connectChecker.onAuthSuccessRtmp()
+        connectCheckerRtsp.onAuthSuccessRtsp()
     }
 
     companion object {
         private val TAG: String? = "RtmpCameraConnector"
+    }
+
+    override fun onAuthErrorRtsp() {
+        connectCheckerRtsp.onAuthErrorRtsp()
+    }
+
+    override fun onAuthSuccessRtsp() {
+        connectCheckerRtsp.onAuthSuccessRtsp()
+    }
+
+    override fun onConnectionFailedRtsp(reason: String) {
+        connectCheckerRtsp.onConnectionFailedRtsp(reason)
+    }
+
+    override fun onConnectionSuccessRtsp() {
+        connectCheckerRtsp.onConnectionSuccessRtsp()
+    }
+
+    override fun onDisconnectRtsp() {
+        connectCheckerRtsp.onDisconnectRtsp()
+    }
+
+    override fun onNewBitrateRtsp(bitrate: Long) {
+        connectCheckerRtsp.onNewBitrateRtsp(bitrate)
     }
 }

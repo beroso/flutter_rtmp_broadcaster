@@ -24,6 +24,7 @@ import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.encoder.video.FormatVideoEncoder
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
+import com.pedro.rtplibrary.rtsp.RtspCamera2
 import com.pedro.rtplibrary.util.BitrateAdapter
 import com.pedro.rtplibrary.view.LightOpenGlView
 import com.pedro.rtplibrary.view.OpenGlView
@@ -32,6 +33,7 @@ import io.flutter.plugin.common.EventChannel.EventSink
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry
 import net.ossrs.rtmp.ConnectCheckerRtmp
+import com.pedro.rtsp.utils.ConnectCheckerRtsp
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -47,7 +49,7 @@ class Camera(
         val resolutionPreset: String?,
         val streamingPreset: String?,
         val enableAudio: Boolean,
-        val useOpenGL: Boolean) : ConnectCheckerRtmp, SurfaceTexture.OnFrameAvailableListener, SurfaceHolder.Callback {
+        val useOpenGL: Boolean) : ConnectCheckerRtmp, ConnectCheckerRtsp, SurfaceTexture.OnFrameAvailableListener, SurfaceHolder.Callback {
     private val cameraManager: CameraManager
 //    private val orientationEventListener: OrientationEventListener
     private val isFrontFacing: Boolean
@@ -71,7 +73,7 @@ class Camera(
 
 //    private val glView: FlutterGLSurfaceView
     private val glView: LightOpenGlView
-    private val rtmpCamera: RtmpCamera2
+    private val rtmpCamera: RtspCamera2
 
     init {
         checkNotNull(activity) { "No activity available!" }
@@ -115,7 +117,7 @@ class Camera(
 //        renderer.addOnRendererStateChangedLister(this)
 //        glView.setRenderer(renderer)
 //        glView.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
-        rtmpCamera = RtmpCamera2(glView, this)
+        rtmpCamera = RtspCamera2(glView, this)
         updateSurfaceView()
     }
 
@@ -865,5 +867,29 @@ class Camera(
 
     override fun surfaceCreated(holder: SurfaceHolder) {
 
+    }
+
+    override fun onAuthErrorRtsp() {
+        onAuthErrorRtmp()
+    }
+
+    override fun onAuthSuccessRtsp() {
+        onAuthSuccessRtmp()
+    }
+
+    override fun onConnectionFailedRtsp(reason: String) {
+        onConnectionFailedRtmp(reason)
+    }
+
+    override fun onConnectionSuccessRtsp() {
+        onConnectionSuccessRtmp()
+    }
+
+    override fun onDisconnectRtsp() {
+        onDisconnectRtmp()
+    }
+
+    override fun onNewBitrateRtsp(bitrate: Long) {
+        onNewBitrateRtmp(bitrate)
     }
 }
